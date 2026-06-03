@@ -8,8 +8,8 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
+    "types": ["node"],
     "declaration": true,
-    "sourceMap": true,
-    "baseUrl": "."
+    "sourceMap": true
   }
 }

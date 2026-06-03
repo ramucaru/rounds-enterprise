@@ -1,7 +1,7 @@
 import fastify, { type FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import mqtt, { type MqttClient } from 'mqtt';
 import { Pool } from 'pg';
 import { EventBus } from './event-bus.js';
