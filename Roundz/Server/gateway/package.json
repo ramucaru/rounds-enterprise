@@ -1,0 +1,19 @@
+{
+  "name": "@roundz/gateway",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "PORT=8080 tsx src/index.ts"
+  },
+  "dependencies": {
+    "@fastify/cors": "latest",
+    "@fastify/http-proxy": "latest",
+    "@roundz/shared": "0.1.0",
+    "fastify": "latest",
+    "socket.io": "latest"
+  }
+}
