@@ -1,0 +1,30 @@
+{
+  "name": "@roundz/server-common",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "tsx src/common.test.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-sns": "latest",
+    "@fastify/cors": "latest",
+    "@fastify/jwt": "latest",
+    "@roundz/shared": "0.1.0",
+    "fastify": "latest",
+    "ioredis": "latest",
+    "kafkajs": "latest",
+    "mqtt": "latest",
+    "pg": "latest",
+    "uuid": "latest"
+  }
+}

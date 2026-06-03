@@ -1,0 +1,26 @@
+name: roundz_customer
+description: Roundz Customer Flutter application.
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_bloc: latest
+  http: latest
+  mqtt_client: latest
+  socket_io_client: latest
+  firebase_core: latest
+  firebase_messaging: latest
+  go_router: latest
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: latest
+
+flutter:
+  uses-material-design: true
