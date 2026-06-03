@@ -7,7 +7,7 @@ import { loadServiceEnv, type ServiceEnv } from './env.js';
 import { createKafkaEventBus, type EventBus } from './kafka.js';
 import { createLogger, type RoundzLogger } from './logger.js';
 import { createRedisClient } from './redis.js';
-import type Redis from 'ioredis';
+import type { Redis } from 'ioredis';
 
 export interface ServiceContext {
   env: ServiceEnv;
@@ -26,7 +26,7 @@ export interface ServiceOptions {
 export async function buildService(options: ServiceOptions): Promise<FastifyInstance> {
   const env = loadServiceEnv({ SERVICE_NAME: options.name, PORT: process.env.PORT ?? options.defaultPort });
   const logger = createLogger(options.name);
-  const app = Fastify({ loggerInstance: logger });
+  const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
   await app.register(cors, { origin: true, credentials: true });
   await app.register(jwt, { secret: env.JWT_SECRET });
 

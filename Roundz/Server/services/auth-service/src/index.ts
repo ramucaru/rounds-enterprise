@@ -1,3 +1,4 @@
+import '@fastify/jwt';
 import bcrypt from 'bcryptjs';
 import { createDomainEvent, EventTopics, queryOne, requireDb, startService } from '@roundz/common';
 import { LoginSchema, RegisterUserSchema } from '@roundz/dto';

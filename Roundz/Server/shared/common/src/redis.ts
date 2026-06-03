@@ -1,4 +1,4 @@
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import type { ServiceEnv } from './env.js';
 
 export function createRedisClient(env: ServiceEnv): Redis {

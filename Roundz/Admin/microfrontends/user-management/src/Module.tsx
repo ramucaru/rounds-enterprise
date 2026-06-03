@@ -16,7 +16,7 @@ export default function Module() {
       <p>Connected to the Roundz gateway endpoint <code>/v1/users/00000000-0000-0000-0000-000000000000</code>.</p>
       {query.isLoading && <p>Loading live data...</p>}
       {query.error && <p role="alert">Gateway request failed: {(query.error as Error).message}</p>}
-      {query.data && <pre>{JSON.stringify(query.data, null, 2)}</pre>}
+      {query.data !== undefined && <pre>{JSON.stringify(query.data, null, 2)}</pre>}
     </section>
   );
 }

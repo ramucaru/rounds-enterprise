@@ -25,7 +25,7 @@ const serviceRoutes = [
 async function main() {
   const env = loadServiceEnv({ SERVICE_NAME: 'gateway', PORT: process.env.GATEWAY_PORT ?? process.env.PORT ?? 3000 });
   const logger = createLogger('gateway');
-  const app = Fastify({ loggerInstance: logger });
+  const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
   await app.register(cors, { origin: true, credentials: true });
   await app.register(jwt, { secret: env.JWT_SECRET });
 
