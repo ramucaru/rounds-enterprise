@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: roundz-config
+  namespace: roundz
+data:
+  REDIS_URL: redis://redis:6379
+  KAFKA_BROKERS: redpanda:9092
+  MQTT_URL: mqtt://mosquitto:1883

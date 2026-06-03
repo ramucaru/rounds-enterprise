@@ -1,0 +1,38 @@
+{
+  "name": "roundz-enterprise",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Roundz enterprise ride-hailing monorepo with backend microservices, admin microfrontends, Flutter apps, shared contracts and infrastructure.",
+  "workspaces": [
+    "Server/gateway",
+    "Server/services/*",
+    "Server/shared/*",
+    "Admin/shell",
+    "Admin/shared",
+    "Admin/microfrontends/*"
+  ],
+  "scripts": {
+    "build": "npm run build:server && npm run build:admin",
+    "build:shared": "npm run build -w @roundz/common && npm run build -w @roundz/dto",
+    "build:server": "npm run build:shared && npm run build -w @roundz/gateway && npm run build -w @roundz/auth-service && npm run build -w @roundz/user-service && npm run build -w @roundz/rider-service && npm run build -w @roundz/trip-service && npm run build -w @roundz/matching-service && npm run build -w @roundz/tracking-service && npm run build -w @roundz/wallet-service && npm run build -w @roundz/payment-service && npm run build -w @roundz/notification-service && npm run build -w @roundz/analytics-service && npm run build -w @roundz/admin-service && npm run build -w @roundz/kyc-service",
+    "build:admin": "npm run build -w @roundz/admin-shared && npm run build -w @roundz/admin-user-management && npm run build -w @roundz/admin-rider-management && npm run build -w @roundz/admin-trip-monitoring && npm run build -w @roundz/admin-wallet-management && npm run build -w @roundz/admin-analytics-dashboard && npm run build -w @roundz/admin-notification-center && npm run build -w @roundz/admin-support-system && npm run build -w @roundz/admin-shell",
+    "test": "npm run test -w @roundz/dto && npm run test -w @roundz/common",
+    "dev:infra": "docker compose up postgres redis redpanda mosquitto localstack",
+    "dev:gateway": "npm run dev -w @roundz/gateway",
+    "dev:auth": "npm run dev -w @roundz/auth-service",
+    "dev:trip": "npm run dev -w @roundz/trip-service"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "@types/pg": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "typescript": "latest",
+    "tsx": "latest",
+    "vitest": "latest"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  }
+}

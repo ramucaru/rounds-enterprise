@@ -1,0 +1,22 @@
+{
+  "name": "@roundz/admin-trip-monitoring",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && vite build",
+    "dev": "vite --host 0.0.0.0 --port 5103",
+    "preview": "vite preview --host 0.0.0.0 --port 5103"
+  },
+  "dependencies": {
+    "@originjs/vite-plugin-federation": "latest",
+    "@roundz/admin-shared": "0.1.0",
+    "@tanstack/react-query": "latest",
+    "@vitejs/plugin-react": "latest",
+    "vite": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "typescript": "latest"
+  }
+}

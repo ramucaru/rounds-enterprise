@@ -1,0 +1,6 @@
+image:
+  repository: roundz/gateway
+  tag: latest
+replicaCount: 3
+service:
+  port: 80

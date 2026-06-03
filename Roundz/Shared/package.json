@@ -1,0 +1,6 @@
+{
+  "name": "@roundz/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cross-platform API, event, and DTO contracts consumed by Server, Admin, Customer, and Rider."
+}
