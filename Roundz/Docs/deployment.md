@@ -1,10 +1,3 @@
 # Deployment
 
-Local dependencies are started with Docker Compose:
-
-```bash
-cd Roundz
-npm run dev:infra
-```
-
-Production deployments use the Kubernetes manifests and Helm values under `Infrastructure`. Terraform creates foundational AWS assets such as SNS and CloudWatch resources; extend it with account-specific VPC, EKS, RDS, ElastiCache, MSK, and IAM modules.
+Local development uses `/Roundz/docker-compose.yml`. Production deployments use Docker images built from `/Server/docker`, Kubernetes manifests in `/Infrastructure/kubernetes`, Helm charts in `/Infrastructure/helm`, and Terraform AWS resources in `/Infrastructure/terraform`.

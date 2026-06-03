@@ -1,17 +1,40 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { Provider } from 'react-redux';
+import React, { Suspense } from 'react';
+import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { App } from './App.js';
-import { store } from './store.js';
+import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+import { moduleCards } from '@roundz/admin-shared';
+import './styles.css';
 
-const queryClient = new QueryClient();
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <App />
-      </QueryClientProvider>
-    </Provider>
-  </React.StrictMode>
-);
+const remotes = {
+  '/users': React.lazy(() => import('userManagement/Module')),
+  '/riders': React.lazy(() => import('riderManagement/Module')),
+  '/trips': React.lazy(() => import('tripMonitoring/Module')),
+  '/wallets': React.lazy(() => import('walletManagement/Module')),
+  '/analytics': React.lazy(() => import('analyticsDashboard/Module')),
+  '/notifications': React.lazy(() => import('notificationCenter/Module')),
+  '/support': React.lazy(() => import('supportSystem/Module'))
+};
+
+function Home() {
+  return <section className="grid">{moduleCards.map((card) => <Link className="card" key={card.path} to={card.path}>{card.title}</Link>)}</section>;
+}
+
+function App() {
+  return (
+    <QueryClientProvider client={new QueryClient()}>
+      <BrowserRouter>
+        <header><Link to="/">Roundz Admin</Link><span>Enterprise Operations Console</span></header>
+        <main>
+          <Suspense fallback={<div className="card">Loading remote module...</div>}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              {Object.entries(remotes).map(([path, Component]) => <Route key={path} path={`${path}/*`} element={<Component />} />)}
+            </Routes>
+          </Suspense>
+        </main>
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+}
+
+createRoot(document.getElementById('root')!).render(<App />);

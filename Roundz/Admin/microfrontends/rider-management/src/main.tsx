@@ -1,5 +1,10 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { RiderManagement } from './App.js';
+import { createRoot } from 'react-dom/client';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import Module from './Module';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><RiderManagement /></React.StrictMode>);
+createRoot(document.getElementById('root')!).render(
+  <QueryClientProvider client={new QueryClient()}>
+    <Module />
+  </QueryClientProvider>
+);

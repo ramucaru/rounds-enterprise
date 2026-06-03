@@ -1,11 +1,6 @@
-replicaCount: 2
 image:
-  repository: ghcr.io/roundz/gateway
+  repository: roundz/gateway
   tag: latest
+replicaCount: 3
 service:
   port: 80
-env:
-  DATABASE_URL: postgres://roundz:roundz@postgres:5432/roundz
-  REDIS_URL: redis://redis:6379
-  KAFKA_BROKERS: kafka:9092
-  MQTT_URL: mqtt://mqtt:1883

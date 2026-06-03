@@ -1,34 +1,33 @@
-import { Server } from 'socket.io';
-import { z } from 'zod';
-import { ROUNDZ_EVENT_TOPICS, coordinatesSchema } from '@roundz/shared';
-import { readServiceConfig, startService, type RouteInstaller } from '@roundz/server-common';
+import { createDomainEvent, createMqttClient, EventTopics, MqttTopics, requireDb, startService } from '@roundz/common';
+import { TrackingPositionSchema } from '@roundz/dto';
 
-const locationSchema = z.object({ riderId: z.string().uuid(), tripId: z.string().uuid().optional(), location: coordinatesSchema });
+void startService({
+  name: 'tracking-service',
+  defaultPort: 3015,
+  async registerRoutes(app, context) {
+    const mqtt = createMqttClient(context.env);
+    mqtt.on('connect', () => context.logger.info('tracking MQTT client connected'));
 
-const routes: RouteInstaller = async (app, runtime) => {
-  const io = new Server(app.server, { cors: { origin: '*' } });
-  io.on('connection', (socket) => {
-    socket.on('tracking:join', (tripId: string) => socket.join(`trip:${tripId}`));
-  });
+    app.post('/v1/tracking/positions', async (request, reply) => {
+      const dto = TrackingPositionSchema.parse(request.body);
+      const result = await requireDb(context).query(
+        `INSERT INTO tracking_positions (trip_id, rider_id, latitude, longitude, heading, speed_mps, recorded_at)
+         VALUES ($1,$2,$3,$4,$5,$6,COALESCE($7, now())) RETURNING *`,
+        [dto.tripId, dto.riderId ?? null, dto.latitude, dto.longitude, dto.heading ?? null, dto.speedMps ?? null, dto.recordedAt ?? null]
+      );
+      const position = result.rows[0];
+      await context.bus.publish(createDomainEvent(EventTopics.TrackingPositionUpdated, dto.tripId, position));
+      mqtt.publish(MqttTopics.tripLocation(dto.tripId), JSON.stringify(position), { qos: 1 });
+      return reply.code(201).send(position);
+    });
 
-  app.post('/tracking/location', async (request) => {
-    const input = locationSchema.parse(request.body);
-    await runtime.db.query(
-      'INSERT INTO tracking_points (trip_id, rider_id, lat, lng) VALUES ($1, $2, $3, $4)',
-      [input.tripId, input.riderId, input.location.lat, input.location.lng]
-    );
-    await runtime.db.query('UPDATE rider_profiles SET current_lat = $2, current_lng = $3, updated_at = now() WHERE id = $1', [input.riderId, input.location.lat, input.location.lng]);
-    await runtime.events.publish(ROUNDZ_EVENT_TOPICS.locationUpdated, 'location.updated', input);
-    runtime.mqtt.publish(`roundz/tracking/${input.riderId}`, JSON.stringify(input));
-    if (input.tripId) io.to(`trip:${input.tripId}`).emit('tracking:location', input);
-    return { accepted: true };
-  });
+    app.get('/v1/tracking/trips/:tripId/latest', async (request, reply) => {
+      const { tripId } = request.params as { tripId: string };
+      const result = await requireDb(context).query('SELECT * FROM tracking_positions WHERE trip_id = $1 ORDER BY recorded_at DESC LIMIT 1', [tripId]);
+      if (!result.rows[0]) return reply.code(404).send({ message: 'No tracking position found' });
+      return result.rows[0];
+    });
 
-  app.get('/tracking/trips/:tripId', async (request) => {
-    const { tripId } = request.params as { tripId: string };
-    const result = await runtime.db.query('SELECT * FROM tracking_points WHERE trip_id = $1 ORDER BY recorded_at ASC', [tripId]);
-    return { points: result.rows };
-  });
-};
-
-await startService(readServiceConfig('tracking-service', 4106), routes);
+    app.addHook('onClose', async () => mqtt.endAsync());
+  }
+});

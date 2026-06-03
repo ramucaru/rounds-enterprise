@@ -1,22 +1,6 @@
 {
-  "name": "@roundz/shared",
+  "name": "@roundz/contracts",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
-  },
-  "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "dev": "tsx src/index.ts",
-    "test": "tsx src/contracts.test.ts"
-  },
-  "dependencies": {
-    "zod": "latest"
-  }
+  "description": "Cross-platform API, event, and DTO contracts consumed by Server, Admin, Customer, and Rider."
 }

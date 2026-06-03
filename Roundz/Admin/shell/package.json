@@ -1,26 +1,23 @@
 {
   "name": "@roundz/admin-shell",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0 --port 5200",
     "build": "tsc -p tsconfig.json && vite build",
-    "preview": "vite preview"
+    "dev": "vite --host 0.0.0.0 --port 5100",
+    "preview": "vite preview --host 0.0.0.0 --port 5100"
   },
   "dependencies": {
-    "@reduxjs/toolkit": "latest",
-    "@roundz/admin-design-system": "0.1.0",
+    "@originjs/vite-plugin-federation": "latest",
     "@roundz/admin-shared": "0.1.0",
     "@tanstack/react-query": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "react-redux": "latest",
-    "socket.io-client": "latest"
-  },
-  "devDependencies": {
     "@vitejs/plugin-react": "latest",
     "vite": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-router-dom": "latest"
+  },
+  "devDependencies": {
     "typescript": "latest"
   }
 }

@@ -1,20 +1,22 @@
 {
   "name": "@roundz/admin-analytics-dashboard",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0 --port 5205",
-    "build": "tsc -p tsconfig.json && vite build"
+    "build": "tsc -p tsconfig.json && vite build",
+    "dev": "vite --host 0.0.0.0 --port 5105",
+    "preview": "vite preview --host 0.0.0.0 --port 5105"
   },
   "dependencies": {
-    "@roundz/admin-design-system": "0.1.0",
+    "@originjs/vite-plugin-federation": "latest",
+    "@roundz/admin-shared": "0.1.0",
+    "@tanstack/react-query": "latest",
+    "@vitejs/plugin-react": "latest",
+    "vite": "latest",
     "react": "latest",
     "react-dom": "latest"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "latest",
-    "vite": "latest",
     "typescript": "latest"
   }
 }

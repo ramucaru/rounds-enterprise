@@ -13,9 +13,9 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: Roundz/package-lock.json
-      - run: npm install
-        working-directory: Roundz
-      - run: npm run build
+      - run: npm ci
         working-directory: Roundz
       - run: npm test
+        working-directory: Roundz
+      - run: npm run build
         working-directory: Roundz

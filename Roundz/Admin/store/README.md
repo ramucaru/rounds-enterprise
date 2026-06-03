@@ -1,3 +1,1 @@
-# Roundz Admin Support Layer
-
-Shared admin wiring for APIs, sockets, state, and environment configuration lives here.
+Redux Toolkit slices for cross-microfrontend admin state live here when promoted from feature modules.

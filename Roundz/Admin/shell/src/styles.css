@@ -1,0 +1,7 @@
+body { margin: 0; font-family: Inter, system-ui, sans-serif; background: #0f172a; color: #e2e8f0; }
+header { display: flex; gap: 1rem; align-items: center; padding: 1rem 2rem; background: #111827; border-bottom: 1px solid #334155; }
+header a { color: #38bdf8; font-weight: 800; text-decoration: none; }
+main { padding: 2rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+.card { display: block; padding: 1.25rem; background: #1e293b; border: 1px solid #334155; border-radius: 14px; color: #e2e8f0; text-decoration: none; box-shadow: 0 20px 35px rgb(0 0 0 / 0.25); }
+.card:hover { border-color: #38bdf8; }

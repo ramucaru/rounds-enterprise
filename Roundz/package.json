@@ -2,54 +2,37 @@
   "name": "roundz-enterprise",
   "version": "0.1.0",
   "private": true,
-  "description": "Roundz enterprise ride-hailing monorepo with microservices, web admin, mobile apps, shared contracts, and infrastructure.",
-  "engines": {
-    "node": ">=20"
-  },
+  "description": "Roundz enterprise ride-hailing monorepo with backend microservices, admin microfrontends, Flutter apps, shared contracts and infrastructure.",
   "workspaces": [
-    "Shared",
-    "Server/shared/common",
     "Server/gateway",
     "Server/services/*",
-    "Admin/shared",
-    "Admin/design-system",
+    "Server/shared/*",
     "Admin/shell",
+    "Admin/shared",
     "Admin/microfrontends/*"
   ],
   "scripts": {
-    "build": "npm run build:shared && npm run build:server && npm run build:admin",
-    "build:shared": "npm run build --workspace @roundz/shared && npm run build --workspace @roundz/server-common",
-    "build:server": "npm run build --workspace @roundz/gateway && npm run build --workspace @roundz/auth-service && npm run build --workspace @roundz/user-service && npm run build --workspace @roundz/rider-service && npm run build --workspace @roundz/trip-service && npm run build --workspace @roundz/matching-service && npm run build --workspace @roundz/tracking-service && npm run build --workspace @roundz/wallet-service && npm run build --workspace @roundz/payment-service && npm run build --workspace @roundz/notification-service && npm run build --workspace @roundz/analytics-service && npm run build --workspace @roundz/admin-service && npm run build --workspace @roundz/kyc-service",
-    "build:admin": "npm run build --workspace @roundz/admin-shared && npm run build --workspace @roundz/admin-design-system && npm run build --workspace @roundz/admin-shell && npm run build --workspace @roundz/admin-user-management && npm run build --workspace @roundz/admin-rider-management && npm run build --workspace @roundz/admin-trip-monitoring && npm run build --workspace @roundz/admin-wallet-management && npm run build --workspace @roundz/admin-analytics-dashboard && npm run build --workspace @roundz/admin-notification-center && npm run build --workspace @roundz/admin-support-system",
-    "typecheck": "npm run build",
-    "dev:infra": "docker compose -f Infrastructure/docker-compose.yml up -d postgres redis kafka mqtt localstack",
-    "dev:server": "concurrently -n gateway,auth,user,rider,trip,matching,tracking,wallet,payment,notification,analytics,admin,kyc -c blue,green,cyan,magenta,yellow npm:dev:gateway npm:dev:auth npm:dev:user npm:dev:rider npm:dev:trip npm:dev:matching npm:dev:tracking npm:dev:wallet npm:dev:payment npm:dev:notification npm:dev:analytics npm:dev:admin npm:dev:kyc",
-    "dev:gateway": "npm run dev --workspace @roundz/gateway",
-    "dev:auth": "npm run dev --workspace @roundz/auth-service",
-    "dev:user": "npm run dev --workspace @roundz/user-service",
-    "dev:rider": "npm run dev --workspace @roundz/rider-service",
-    "dev:trip": "npm run dev --workspace @roundz/trip-service",
-    "dev:matching": "npm run dev --workspace @roundz/matching-service",
-    "dev:tracking": "npm run dev --workspace @roundz/tracking-service",
-    "dev:wallet": "npm run dev --workspace @roundz/wallet-service",
-    "dev:payment": "npm run dev --workspace @roundz/payment-service",
-    "dev:notification": "npm run dev --workspace @roundz/notification-service",
-    "dev:analytics": "npm run dev --workspace @roundz/analytics-service",
-    "dev:admin": "npm run dev --workspace @roundz/admin-service",
-    "dev:kyc": "npm run dev --workspace @roundz/kyc-service",
-    "test": "npm run test --workspace @roundz/shared && npm run test --workspace @roundz/server-common"
+    "build": "npm run build:server && npm run build:admin",
+    "build:shared": "npm run build -w @roundz/common && npm run build -w @roundz/dto",
+    "build:server": "npm run build:shared && npm run build -w @roundz/gateway && npm run build -w @roundz/auth-service && npm run build -w @roundz/user-service && npm run build -w @roundz/rider-service && npm run build -w @roundz/trip-service && npm run build -w @roundz/matching-service && npm run build -w @roundz/tracking-service && npm run build -w @roundz/wallet-service && npm run build -w @roundz/payment-service && npm run build -w @roundz/notification-service && npm run build -w @roundz/analytics-service && npm run build -w @roundz/admin-service && npm run build -w @roundz/kyc-service",
+    "build:admin": "npm run build -w @roundz/admin-shared && npm run build -w @roundz/admin-user-management && npm run build -w @roundz/admin-rider-management && npm run build -w @roundz/admin-trip-monitoring && npm run build -w @roundz/admin-wallet-management && npm run build -w @roundz/admin-analytics-dashboard && npm run build -w @roundz/admin-notification-center && npm run build -w @roundz/admin-support-system && npm run build -w @roundz/admin-shell",
+    "test": "npm run test -w @roundz/dto && npm run test -w @roundz/common",
+    "dev:infra": "docker compose up postgres redis redpanda mosquitto localstack",
+    "dev:gateway": "npm run dev -w @roundz/gateway",
+    "dev:auth": "npm run dev -w @roundz/auth-service",
+    "dev:trip": "npm run dev -w @roundz/trip-service"
   },
   "devDependencies": {
-    "@types/bcryptjs": "latest",
-    "@types/jsonwebtoken": "latest",
     "@types/node": "latest",
     "@types/pg": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
-    "@vitejs/plugin-react": "latest",
-    "concurrently": "latest",
-    "tsx": "latest",
     "typescript": "latest",
-    "vite": "latest"
+    "tsx": "latest",
+    "vitest": "latest"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
   }
 }

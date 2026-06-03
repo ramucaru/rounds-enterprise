@@ -1,32 +1,33 @@
 # Roundz Enterprise Monorepo
 
-Roundz is an enterprise ride-hailing platform scaffolded as a production-oriented monorepo. It contains Fastify microservices, a React admin microfrontend shell, Flutter customer and rider applications, shared contracts, and infrastructure assets.
+This repository contains the generated Roundz enterprise architecture under the required `/Roundz` root:
 
-## Required root structure
-
-```text
-Roundz/
-  Server/
-  Admin/
-  Customer/
-  Rider/
-  Infrastructure/
-  Shared/
-  Docs/
-```
+- `Server` - Node.js Fastify TypeScript backend gateway and microservices.
+- `Admin` - React TypeScript admin shell and Module Federation microfrontends.
+- `Customer` - Flutter customer application with modular features.
+- `Rider` - Flutter rider application with modular features.
+- `Infrastructure` - Docker Compose, Kubernetes, Helm, Terraform, monitoring, and CI/CD assets.
+- `Shared` - Cross-platform contracts, DTO schemas, events, API clients, and constants.
+- `Docs` - Architecture, API, deployment, Kafka, and database documentation.
 
 ## Quick start
 
 ```bash
 cd Roundz
+cp .env.example .env
 npm install
 npm run dev:infra
 npm run build
-npm run dev:server
+npm test
+npm run dev:gateway
 ```
 
-The default API gateway runs on `http://localhost:8080` and proxies the service APIs under `/api/*`.
+Start service processes in separate terminals, for example:
 
-## Branch
+```bash
+npm run dev -w @roundz/auth-service
+npm run dev -w @roundz/trip-service
+npm run dev -w @roundz/tracking-service
+```
 
-This baseline was prepared on branch `cursor/development-base-1-5dc3`, using `development-base-1` as the requested project baseline identifier.
+The backend is wired to PostgreSQL, Redis, Kafka/Redpanda, MQTT, Socket.IO, Firebase Cloud Messaging, and AWS SNS/S3 adapters. Local infrastructure is provided by `docker-compose.yml`.

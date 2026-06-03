@@ -1,0 +1,26 @@
+openapi: 3.1.0
+info:
+  title: Roundz Gateway API
+  version: 0.1.0
+servers:
+  - url: http://localhost:3000
+paths:
+  /v1/auth/register:
+    post:
+      summary: Register a customer, rider, or admin account.
+      responses:
+        '201': { description: Created }
+  /v1/trips:
+    post:
+      summary: Request a trip.
+      responses:
+        '201': { description: Trip requested }
+    get:
+      summary: List trips by customer, rider, or status.
+      responses:
+        '200': { description: Trip list }
+  /v1/tracking/positions:
+    post:
+      summary: Submit a live rider position.
+      responses:
+        '201': { description: Position persisted and broadcast }

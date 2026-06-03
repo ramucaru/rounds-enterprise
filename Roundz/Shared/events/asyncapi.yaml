@@ -1,0 +1,17 @@
+asyncapi: 3.0.0
+info:
+  title: Roundz Event Bus
+  version: 0.1.0
+channels:
+  roundz.trip.requested:
+    address: roundz.trip.requested
+    messages:
+      TripRequested:
+        payload:
+          type: object
+  roundz.tracking.position.updated:
+    address: roundz.tracking.position.updated
+    messages:
+      TrackingPositionUpdated:
+        payload:
+          type: object

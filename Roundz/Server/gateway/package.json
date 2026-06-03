@@ -1,19 +1,23 @@
 {
   "name": "@roundz/gateway",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "dev": "PORT=8080 tsx src/index.ts"
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js"
   },
   "dependencies": {
+    "@socket.io/redis-adapter": "latest",
     "@fastify/cors": "latest",
     "@fastify/http-proxy": "latest",
-    "@roundz/shared": "0.1.0",
+    "@fastify/jwt": "latest",
+    "@roundz/common": "0.1.0",
+    "@roundz/dto": "0.1.0",
     "fastify": "latest",
+    "ioredis": "latest",
     "socket.io": "latest"
   }
 }

@@ -1,34 +1,34 @@
-import { ROUNDZ_EVENT_TOPICS, coordinatesSchema } from '@roundz/shared';
-import { readServiceConfig, startService, type RouteInstaller } from '@roundz/server-common';
-import { z } from 'zod';
+import { createDomainEvent, EventTopics, requireDb, startService } from '@roundz/common';
 
-const matchSchema = z.object({ tripId: z.string().uuid(), pickup: coordinatesSchema });
-
-const routes: RouteInstaller = async (app, runtime) => {
-  app.post('/matching/match', async (request, reply) => {
-    const input = matchSchema.parse(request.body);
-    const rider = await findNearestAvailableRider(runtime.db, input.pickup.lat, input.pickup.lng);
-    if (!rider) {
-      reply.code(404);
-      return { error: 'No available riders nearby' };
+void startService({
+  name: 'matching-service',
+  defaultPort: 3014,
+  async registerRoutes(app, context) {
+    async function matchTrip(tripId: string) {
+      const db = requireDb(context);
+      const tripResult = await db.query('SELECT * FROM trips WHERE id = $1', [tripId]);
+      const trip = tripResult.rows[0];
+      if (!trip) throw new Error('Trip not found');
+      const riderResult = await db.query(
+        `SELECT id, user_id, vehicle_type, current_latitude, current_longitude
+         FROM rider_profiles
+         WHERE online_status = 'online' AND kyc_status = 'verified'
+         ORDER BY updated_at DESC LIMIT 1`
+      );
+      const rider = riderResult.rows[0];
+      if (!rider) return { matched: false, reason: 'No verified online riders available' };
+      const updated = await db.query("UPDATE trips SET rider_id = $2, status = 'matched', updated_at = now() WHERE id = $1 RETURNING *", [tripId, rider.id]);
+      await context.bus.publish(createDomainEvent(EventTopics.TripMatched, tripId, { trip: updated.rows[0], rider }));
+      return { matched: true, trip: updated.rows[0], rider };
     }
-    await runtime.db.query('UPDATE trips SET rider_id = $2, status = $3, updated_at = now() WHERE id = $1', [input.tripId, rider.id, 'matched']);
-    await runtime.db.query('UPDATE rider_profiles SET available = false, updated_at = now() WHERE id = $1', [rider.id]);
-    await runtime.events.publish(ROUNDZ_EVENT_TOPICS.tripMatched, 'trip.matched', { tripId: input.tripId, riderId: rider.id, estimatedPickupMinutes: 5 });
-    return { match: { tripId: input.tripId, riderId: rider.id, estimatedPickupMinutes: 5 } };
-  });
-};
 
-async function findNearestAvailableRider(db: any, lat: number, lng: number) {
-  const result = await db.query(
-    `SELECT *, ((current_lat - $1) * (current_lat - $1) + (current_lng - $2) * (current_lng - $2)) AS distance
-     FROM rider_profiles
-     WHERE available = true AND current_lat IS NOT NULL AND current_lng IS NOT NULL
-     ORDER BY distance ASC, rating DESC
-     LIMIT 1`,
-    [lat, lng]
-  );
-  return result.rows[0];
-}
+    app.post('/v1/matching/dispatch/:tripId', async (request) => {
+      const { tripId } = request.params as { tripId: string };
+      return matchTrip(tripId);
+    });
 
-await startService(readServiceConfig('matching-service', 4105), routes);
+    void context.bus.subscribe(EventTopics.TripRequested, 'matching-service', async (event) => {
+      await matchTrip(event.aggregateId);
+    }).catch((error) => context.logger.error({ error }, 'matching subscription failed'));
+  }
+});

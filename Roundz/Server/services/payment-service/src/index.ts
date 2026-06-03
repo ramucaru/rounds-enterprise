@@ -1,23 +1,27 @@
-import { randomUUID } from 'node:crypto';
-import { z } from 'zod';
-import { DEFAULT_CURRENCY, ROUNDZ_EVENT_TOPICS } from '@roundz/shared';
-import { readServiceConfig, startService, type RouteInstaller } from '@roundz/server-common';
+import { createDomainEvent, EventTopics, requireDb, startService } from '@roundz/common';
+import { PaymentIntentSchema } from '@roundz/dto';
 
-const paymentSchema = z.object({ userId: z.string().uuid(), tripId: z.string().uuid().optional(), amountCents: z.number().int().positive(), paymentMethodId: z.string().min(1) });
+void startService({
+  name: 'payment-service',
+  defaultPort: 3017,
+  async registerRoutes(app, context) {
+    app.post('/v1/payments/intents', async (request, reply) => {
+      const dto = PaymentIntentSchema.parse(request.body);
+      const providerReference = `${dto.provider}_${crypto.randomUUID()}`;
+      const result = await requireDb(context).query(
+        `INSERT INTO payments (trip_id, user_id, amount_cents, currency, provider, provider_reference, status)
+         VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+        [dto.tripId ?? null, dto.userId, dto.amountCents, dto.currency, dto.provider, providerReference, dto.provider === 'cash' ? 'pending_cash_collection' : 'requires_capture']
+      );
+      return reply.code(201).send(result.rows[0]);
+    });
 
-const routes: RouteInstaller = async (app, runtime) => {
-  app.post('/payments/charge', async (request, reply) => {
-    const input = paymentSchema.parse(request.body);
-    const providerReference = `roundz_${randomUUID()}`;
-    const result = await runtime.db.query(
-      `INSERT INTO payments (trip_id, user_id, amount_cents, currency, status, provider_reference)
-       VALUES ($1, $2, $3, $4, 'completed', $5) RETURNING *`,
-      [input.tripId, input.userId, input.amountCents, DEFAULT_CURRENCY, providerReference]
-    );
-    await runtime.events.publish(ROUNDZ_EVENT_TOPICS.paymentCompleted, 'payment.completed', { paymentId: result.rows[0].id, userId: input.userId, amountCents: input.amountCents });
-    reply.code(201);
-    return { payment: result.rows[0] };
-  });
-};
-
-await startService(readServiceConfig('payment-service', 4108), routes);
+    app.post('/v1/payments/:id/capture', async (request) => {
+      const { id } = request.params as { id: string };
+      const result = await requireDb(context).query("UPDATE payments SET status = 'captured', updated_at = now() WHERE id = $1 RETURNING *", [id]);
+      const payment = result.rows[0];
+      await context.bus.publish(createDomainEvent(EventTopics.PaymentCaptured, id, payment));
+      return payment;
+    });
+  }
+});

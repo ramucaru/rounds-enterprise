@@ -1,3 +1,3 @@
 # Database Schema
 
-The shared server runtime applies idempotent PostgreSQL migrations at service startup. Tables include users, rider profiles, trips, wallets, wallet transactions, payments, tracking points, push tokens, notifications, and KYC records.
+The PostgreSQL schema is defined in `/Server/shared/common/sql/001_initial_schema.sql` and automatically applied by services on startup when `DATABASE_URL` is configured.

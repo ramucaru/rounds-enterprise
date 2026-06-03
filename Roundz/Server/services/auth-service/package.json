@@ -1,20 +1,19 @@
 {
   "name": "@roundz/auth-service",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "dev": "PORT=4101 tsx src/index.ts"
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js"
   },
   "dependencies": {
-    "@roundz/server-common": "0.1.0",
-    "@roundz/shared": "0.1.0",
+        "@fastify/jwt": "latest",
+    "@roundz/common": "0.1.0",
+    "@roundz/dto": "0.1.0",
     "bcryptjs": "latest",
-    "jsonwebtoken": "latest",
-    "uuid": "latest",
-    "zod": "latest"
+    "fastify": "latest"
   }
 }

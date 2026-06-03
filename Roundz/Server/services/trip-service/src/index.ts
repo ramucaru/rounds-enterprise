@@ -1,57 +1,45 @@
-import { ROUNDZ_EVENT_TOPICS, tripRequestSchema } from '@roundz/shared';
-import { readServiceConfig, startService, type RouteInstaller } from '@roundz/server-common';
+import { createDomainEvent, EventTopics, requireDb, startService } from '@roundz/common';
+import { CreateTripSchema, UpdateTripStatusSchema } from '@roundz/dto';
 
-const routes: RouteInstaller = async (app, runtime) => {
-  app.post('/trips', async (request, reply) => {
-    const input = tripRequestSchema.parse(request.body);
-    const fareCents = estimateFareCents(input.pickup.lat, input.pickup.lng, input.dropoff.lat, input.dropoff.lng);
-    const result = await runtime.db.query(
-      `INSERT INTO trips (customer_id, pickup_lat, pickup_lng, dropoff_lat, dropoff_lng, status, fare_cents)
-       VALUES ($1, $2, $3, $4, $5, 'requested', $6)
-       RETURNING *`,
-      [input.customerId, input.pickup.lat, input.pickup.lng, input.dropoff.lat, input.dropoff.lng, fareCents]
-    );
-    const trip = mapTrip(result.rows[0]);
-    await runtime.events.publish(ROUNDZ_EVENT_TOPICS.tripRequested, 'trip.requested', { trip });
-    reply.code(201);
-    return { trip };
-  });
+void startService({
+  name: 'trip-service',
+  defaultPort: 3013,
+  async registerRoutes(app, context) {
+    app.post('/v1/trips', async (request, reply) => {
+      const dto = CreateTripSchema.parse(request.body);
+      const result = await requireDb(context).query(
+        `INSERT INTO trips (customer_id, pickup_address, pickup_latitude, pickup_longitude, dropoff_address, dropoff_latitude, dropoff_longitude, quoted_fare_cents, currency)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+        [dto.customerId, dto.pickupAddress, dto.pickupLatitude, dto.pickupLongitude, dto.dropoffAddress, dto.dropoffLatitude, dto.dropoffLongitude, dto.quotedFareCents, dto.currency]
+      );
+      const trip = result.rows[0];
+      await context.bus.publish(createDomainEvent(EventTopics.TripRequested, trip.id, trip));
+      return reply.code(201).send(trip);
+    });
 
-  app.patch('/trips/:id/status', async (request) => {
-    const { id } = request.params as { id: string };
-    const { status } = request.body as { status: string };
-    const result = await runtime.db.query('UPDATE trips SET status = $2, updated_at = now() WHERE id = $1 RETURNING *', [id, status]);
-    await runtime.events.publish(ROUNDZ_EVENT_TOPICS.tripStatusChanged, 'trip.status.changed', { tripId: id, status });
-    return { trip: mapTrip(result.rows[0]) };
-  });
+    app.get('/v1/trips', async (request) => {
+      const query = request.query as { customerId?: string; riderId?: string; status?: string };
+      const result = await requireDb(context).query(
+        `SELECT * FROM trips
+         WHERE ($1::uuid IS NULL OR customer_id = $1::uuid)
+           AND ($2::uuid IS NULL OR rider_id = $2::uuid)
+           AND ($3::text IS NULL OR status = $3)
+         ORDER BY requested_at DESC LIMIT 100`,
+        [query.customerId ?? null, query.riderId ?? null, query.status ?? null]
+      );
+      return result.rows;
+    });
 
-  app.get('/trips/:id', async (request, reply) => {
-    const { id } = request.params as { id: string };
-    const result = await runtime.db.query('SELECT * FROM trips WHERE id = $1', [id]);
-    if (!result.rows[0]) {
-      reply.code(404);
-      return { error: 'Trip not found' };
-    }
-    return { trip: mapTrip(result.rows[0]) };
-  });
-};
-
-function estimateFareCents(pickupLat: number, pickupLng: number, dropoffLat: number, dropoffLng: number): number {
-  const distance = Math.hypot(pickupLat - dropoffLat, pickupLng - dropoffLng) * 111;
-  return Math.max(500, Math.round((250 + distance * 175) * 100) / 100);
-}
-
-function mapTrip(row: any) {
-  return {
-    id: row.id,
-    customerId: row.customer_id,
-    riderId: row.rider_id ?? undefined,
-    pickup: { lat: row.pickup_lat, lng: row.pickup_lng },
-    dropoff: { lat: row.dropoff_lat, lng: row.dropoff_lng },
-    status: row.status,
-    fareCents: row.fare_cents,
-    createdAt: new Date(row.created_at).toISOString()
-  };
-}
-
-await startService(readServiceConfig('trip-service', 4104), routes);
+    app.patch('/v1/trips/:id/status', async (request) => {
+      const { id } = request.params as { id: string };
+      const dto = UpdateTripStatusSchema.parse(request.body);
+      const result = await requireDb(context).query(
+        `UPDATE trips SET status = $2, rider_id = COALESCE($3, rider_id), updated_at = now() WHERE id = $1 RETURNING *`,
+        [id, dto.status, dto.riderId ?? null]
+      );
+      const trip = result.rows[0];
+      await context.bus.publish(createDomainEvent(EventTopics.TripStatusChanged, id, trip));
+      return trip;
+    });
+  }
+});

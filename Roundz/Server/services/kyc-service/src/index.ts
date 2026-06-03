@@ -1,27 +1,21 @@
-import { z } from 'zod';
-import { ROUNDZ_EVENT_TOPICS } from '@roundz/shared';
-import { readServiceConfig, startService, type RouteInstaller } from '@roundz/server-common';
+import { createDomainEvent, EventTopics, requireDb, startService, uploadKycDocument } from '@roundz/common';
+import { KycSubmissionSchema } from '@roundz/dto';
 
-const kycSchema = z.object({ riderId: z.string().uuid(), documentType: z.string().min(1), documentUrl: z.string().url() });
-
-const routes: RouteInstaller = async (app, runtime) => {
-  app.post('/kyc/records', async (request, reply) => {
-    const input = kycSchema.parse(request.body);
-    const result = await runtime.db.query(
-      'INSERT INTO kyc_records (rider_id, document_type, document_url) VALUES ($1, $2, $3) RETURNING *',
-      [input.riderId, input.documentType, input.documentUrl]
-    );
-    await runtime.events.publish(ROUNDZ_EVENT_TOPICS.kycSubmitted, 'kyc.submitted', { riderId: input.riderId, recordId: result.rows[0].id });
-    reply.code(201);
-    return { record: result.rows[0] };
-  });
-
-  app.patch('/kyc/records/:id/status', async (request) => {
-    const { id } = request.params as { id: string };
-    const { status } = request.body as { status: 'approved' | 'rejected' | 'submitted' };
-    const result = await runtime.db.query('UPDATE kyc_records SET status = $2, updated_at = now() WHERE id = $1 RETURNING *', [id, status]);
-    return { record: result.rows[0] };
-  });
-};
-
-await startService(readServiceConfig('kyc-service', 4112), routes);
+void startService({
+  name: 'kyc-service',
+  defaultPort: 3021,
+  async registerRoutes(app, context) {
+    app.post('/v1/kyc/submissions', async (request, reply) => {
+      const dto = KycSubmissionSchema.parse(request.body);
+      const key = `kyc/${dto.riderId}/${dto.documentType}/${crypto.randomUUID()}`;
+      const buffer = Buffer.from(dto.documentBase64, 'base64');
+      const s3Uri = await uploadKycDocument(context.env, key, buffer, dto.contentType);
+      const result = await requireDb(context).query(
+        'INSERT INTO kyc_submissions (rider_id, document_type, document_s3_key) VALUES ($1,$2,$3) RETURNING *',
+        [dto.riderId, dto.documentType, s3Uri]
+      );
+      await context.bus.publish(createDomainEvent(EventTopics.KycSubmitted, result.rows[0].id, result.rows[0]));
+      return reply.code(201).send(result.rows[0]);
+    });
+  }
+});
