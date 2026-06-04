@@ -16,14 +16,34 @@ const remotes = {
 };
 
 function Home() {
-  return <section className="grid">{moduleCards.map((card) => <Link className="card" key={card.path} to={card.path}>{card.title}</Link>)}</section>;
+  return (
+    <>
+      <section className="hero">
+        <p className="eyebrow">Roundz control plane</p>
+        <h1>Operate trips, riders, wallets, support and notifications from one console.</h1>
+        <p className="hero-copy">Each card opens a federated operations module connected to the live Fastify gateway.</p>
+      </section>
+      <section className="grid">
+        {moduleCards.map((card) => (
+          <Link className="card" key={card.path} to={card.path}>
+            <span className="card-kicker">Module</span>
+            <strong>{card.title}</strong>
+            <span className="card-action">Open workspace</span>
+          </Link>
+        ))}
+      </section>
+    </>
+  );
 }
 
 function App() {
   return (
     <QueryClientProvider client={new QueryClient()}>
       <BrowserRouter>
-        <header><Link to="/">Roundz Admin</Link><span>Enterprise Operations Console</span></header>
+        <header>
+          <Link className="brand" to="/">Roundz Admin</Link>
+          <span>Enterprise Operations Console</span>
+        </header>
         <main>
           <Suspense fallback={<div className="card">Loading remote module...</div>}>
             <Routes>

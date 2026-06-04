@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/app_theme.dart';
 import '../../core/api_client.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -19,5 +20,84 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
   @override
-  Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: const Text('Roundz Customer')), body: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [Text(status), FilledButton(onPressed: login, child: const Text('Test gateway login'))])));
+  Widget build(BuildContext context) => Scaffold(
+    body: SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: RoundzCustomerTheme.primary,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: const [BoxShadow(color: Color(0x330EA5E9), blurRadius: 20, offset: Offset(0, 10))],
+                  ),
+                  child: const Icon(Icons.route_rounded, color: Colors.white),
+                ),
+                const SizedBox(width: 12),
+                Text('Roundz Customer', style: Theme.of(context).textTheme.titleLarge),
+              ],
+            ),
+            const SizedBox(height: 32),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF0EA5E9), Color(0xFF22C55E)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(32),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.local_taxi_rounded, color: Colors.white, size: 40),
+                  const SizedBox(height: 28),
+                  Text(
+                    'Book fast rides with live tracking and wallet payments.',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Connected to the Roundz Fastify gateway through /v1/auth/login.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white.withOpacity(0.88)),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Gateway status', style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 10),
+                    Text(status),
+                    const SizedBox(height: 18),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: login,
+                        icon: const Icon(Icons.login_rounded),
+                        label: const Text('Test gateway login'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }

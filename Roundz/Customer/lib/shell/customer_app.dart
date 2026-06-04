@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../core/app_theme.dart';
 import '../modules/auth_module/auth_screen.dart';
 import '../modules/tracking_module/tracking_screen.dart';
 import '../modules/wallet_module/wallet_screen.dart';
@@ -14,6 +15,11 @@ class CustomerApp extends StatelessWidget {
       GoRoute(path: '/tracking/:tripId', builder: (_, state) => TrackingScreen(tripId: state.pathParameters['tripId']!)),
       GoRoute(path: '/wallet/:userId', builder: (_, state) => WalletScreen(userId: state.pathParameters['userId']!)),
     ]);
-    return MaterialApp.router(title: 'Roundz Customer', theme: ThemeData(colorSchemeSeed: Colors.blue), routerConfig: router);
+    return MaterialApp.router(
+      title: 'Roundz Customer',
+      debugShowCheckedModeBanner: false,
+      theme: RoundzCustomerTheme.light,
+      routerConfig: router,
+    );
   }
 }
