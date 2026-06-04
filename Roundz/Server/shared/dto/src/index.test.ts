@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { CreateTripSchema, RegisterUserSchema, TrackingPositionSchema } from './index.js';
+import {
+  CreateRiderProfileSchema,
+  CreateTripSchema,
+  KycSubmissionSchema,
+  LoginSchema,
+  NotificationRequestSchema,
+  PaymentIntentSchema,
+  RegisterUserSchema,
+  TrackingPositionSchema,
+  UpdateTripStatusSchema,
+  WalletLedgerEntrySchema
+} from './index.js';
 
 describe('Roundz DTO schemas', () => {
   it('normalizes registration email and validates password strength', () => {
@@ -23,5 +34,15 @@ describe('Roundz DTO schemas', () => {
       quotedFareCents: 2500
     });
     expect(dto.currency).toBe('USD');
+  });
+
+  it('exports auth, rider, trip, wallet, payment, notification and kyc schemas from the root barrel', () => {
+    expect(LoginSchema.parse({ email: 'USER@ROUNDZ.APP', password: 'secret' }).email).toBe('user@roundz.app');
+    expect(CreateRiderProfileSchema.parse({ userId: crypto.randomUUID() }).vehicleType).toBe('motorcycle');
+    expect(UpdateTripStatusSchema.parse({ status: 'matched', riderId: crypto.randomUUID() }).status).toBe('matched');
+    expect(WalletLedgerEntrySchema.parse({ userId: crypto.randomUUID(), amountCents: 1000, entryType: 'credit', reference: 'top-up' }).metadata).toEqual({});
+    expect(PaymentIntentSchema.parse({ userId: crypto.randomUUID(), amountCents: 2500, provider: 'cash' }).currency).toBe('USD');
+    expect(NotificationRequestSchema.parse({ channel: 'in_app', title: 'Trip update', body: 'Your rider arrived' }).metadata).toEqual({});
+    expect(KycSubmissionSchema.parse({ riderId: crypto.randomUUID(), documentType: 'driver_license', documentBase64: 'YWJjZGVmZ2hpamtsbW5vcA==' }).contentType).toBe('application/octet-stream');
   });
 });

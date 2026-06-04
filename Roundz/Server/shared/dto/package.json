@@ -4,7 +4,56 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "exports": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./common": {
+      "types": "./dist/common.d.ts",
+      "import": "./dist/common.js"
+    },
+    "./auth": {
+      "types": "./dist/auth.dto.d.ts",
+      "import": "./dist/auth.dto.js"
+    },
+    "./users": {
+      "types": "./dist/users.dto.d.ts",
+      "import": "./dist/users.dto.js"
+    },
+    "./riders": {
+      "types": "./dist/riders.dto.d.ts",
+      "import": "./dist/riders.dto.js"
+    },
+    "./trips": {
+      "types": "./dist/trips.dto.d.ts",
+      "import": "./dist/trips.dto.js"
+    },
+    "./tracking": {
+      "types": "./dist/tracking.dto.d.ts",
+      "import": "./dist/tracking.dto.js"
+    },
+    "./wallet": {
+      "types": "./dist/wallet.dto.d.ts",
+      "import": "./dist/wallet.dto.js"
+    },
+    "./payment": {
+      "types": "./dist/payment.dto.d.ts",
+      "import": "./dist/payment.dto.js"
+    },
+    "./notification": {
+      "types": "./dist/notification.dto.d.ts",
+      "import": "./dist/notification.dto.js"
+    },
+    "./kyc": {
+      "types": "./dist/kyc.dto.d.ts",
+      "import": "./dist/kyc.dto.js"
+    },
+    "./analytics": {
+      "types": "./dist/analytics.dto.d.ts",
+      "import": "./dist/analytics.dto.js"
+    }
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "vitest run src"
