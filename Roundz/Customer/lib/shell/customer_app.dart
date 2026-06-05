@@ -12,7 +12,9 @@ class CustomerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final router = GoRouter(routes: [
       GoRoute(path: '/', builder: (_, __) => const AuthScreen()),
+          GoRoute(path: '/tracking', builder: (_, __) => const TrackingScreen(tripId: 'current')),
       GoRoute(path: '/tracking/:tripId', builder: (_, state) => TrackingScreen(tripId: state.pathParameters['tripId']!)),
+          GoRoute(path: '/wallet', builder: (_, __) => const WalletScreen(userId: 'me')),
       GoRoute(path: '/wallet/:userId', builder: (_, state) => WalletScreen(userId: state.pathParameters['userId']!)),
     ]);
     return MaterialApp.router(
