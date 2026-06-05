@@ -2,50 +2,78 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import proxy from '@fastify/http-proxy';
+import rateLimit from '@fastify/rate-limit';
+import { corsOrigins, serviceDiscovery } from '@roundz/config';
 import { Server as SocketServer } from 'socket.io';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { createDomainEvent, createKafkaEventBus, createLogger, createRedisClient, EventTopics, loadServiceEnv } from '@roundz/common';
 import { TrackingPositionSchema } from '@roundz/dto';
 
 const serviceRoutes = [
-  ['AUTH_SERVICE_URL', '/v1/auth', 'http://localhost:3010'],
-  ['USER_SERVICE_URL', '/v1/users', 'http://localhost:3011'],
-  ['RIDER_SERVICE_URL', '/v1/riders', 'http://localhost:3012'],
-  ['TRIP_SERVICE_URL', '/v1/trips', 'http://localhost:3013'],
-  ['MATCHING_SERVICE_URL', '/v1/matching', 'http://localhost:3014'],
-  ['TRACKING_SERVICE_URL', '/v1/tracking', 'http://localhost:3015'],
-  ['WALLET_SERVICE_URL', '/v1/wallets', 'http://localhost:3016'],
-  ['PAYMENT_SERVICE_URL', '/v1/payments', 'http://localhost:3017'],
-  ['NOTIFICATION_SERVICE_URL', '/v1/notifications', 'http://localhost:3018'],
-  ['ANALYTICS_SERVICE_URL', '/v1/analytics', 'http://localhost:3019'],
-  ['ADMIN_SERVICE_URL', '/v1/admin', 'http://localhost:3020'],
-  ['KYC_SERVICE_URL', '/v1/kyc', 'http://localhost:3021']
+  ['auth', '/v1/auth'],
+  ['user', '/v1/users'],
+  ['rider', '/v1/riders'],
+  ['trip', '/v1/trips'],
+  ['matching', '/v1/matching'],
+  ['tracking', '/v1/tracking'],
+  ['wallet', '/v1/wallets'],
+  ['payment', '/v1/payments'],
+  ['notification', '/v1/notifications'],
+  ['analytics', '/v1/analytics'],
+  ['admin', '/v1/admin'],
+  ['kyc', '/v1/kyc']
 ] as const;
 
 async function main() {
-  const env = loadServiceEnv({ SERVICE_NAME: 'gateway', PORT: process.env.GATEWAY_PORT ?? process.env.PORT ?? 3000 });
-  const logger = createLogger('gateway');
-  const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
-  await app.register(cors, { origin: true, credentials: true });
+  const env = loadServiceEnv({ SERVICE_NAME: 'gateway', PORT: 3000 });
+  const discovery = serviceDiscovery(env);
+  const logger = createLogger('gateway', env.LOG_LEVEL);
+  const app = Fastify({ logger: { level: env.LOG_LEVEL } });
+  await app.register(cors, { origin: corsOrigins(env), credentials: true });
   await app.register(jwt, { secret: env.JWT_SECRET });
-
-  app.get('/health', async () => ({ service: 'gateway', status: 'ok', timestamp: new Date().toISOString() }));
-
-  for (const [envName, prefix, fallback] of serviceRoutes) {
-    await app.register(proxy, {
-      upstream: process.env[envName] ?? fallback,
-      prefix,
-      rewritePrefix: prefix,
-      websocket: true
-    });
-  }
-
   const redisPub = createRedisClient(env);
   const redisSub = createRedisClient(env);
   const bus = createKafkaEventBus(env, logger);
   const io = new SocketServer(app.server, { cors: { origin: true, credentials: true }, path: '/socket.io' });
 
   await Promise.all([redisPub.connect(), redisSub.connect()]);
+  await app.register(rateLimit, {
+    max: env.RATE_LIMIT_MAX,
+    timeWindow: env.RATE_LIMIT_WINDOW_MS,
+    redis: redisPub,
+    keyGenerator: (request) => request.headers.authorization ?? request.ip
+  });
+
+  app.addHook('onRequest', async (request, reply) => {
+    const incomingTraceId = request.headers['x-request-id'];
+    const traceId = Array.isArray(incomingTraceId) ? incomingTraceId[0] : incomingTraceId;
+    reply.header('x-request-id', traceId ?? request.id);
+  });
+
+  app.setErrorHandler((error, request, reply) => {
+    const gatewayError = error as Error & { statusCode?: number; code?: string };
+    const statusCode = gatewayError.statusCode && gatewayError.statusCode >= 400 ? gatewayError.statusCode : 500;
+    request.log.error({ error, traceId: request.id }, 'gateway request failed');
+    void reply.code(statusCode).send({
+      error: {
+        message: statusCode >= 500 ? 'Internal gateway error' : gatewayError.message,
+        code: gatewayError.code ?? 'ROUNDZ_GATEWAY_ERROR',
+        traceId: request.id
+      }
+    });
+  });
+
+  app.get('/health', async () => ({ service: 'gateway', status: 'ok', timestamp: new Date().toISOString() }));
+
+  for (const [serviceName, prefix] of serviceRoutes) {
+    await app.register(proxy, {
+      upstream: discovery[serviceName],
+      prefix,
+      rewritePrefix: prefix,
+      websocket: true
+    });
+  }
+
   io.adapter(createAdapter(redisPub, redisSub));
 
   io.on('connection', (socket) => {
@@ -73,7 +101,15 @@ async function main() {
     redisSub.disconnect();
   });
 
-  await app.listen({ host: '0.0.0.0', port: env.PORT });
+  const shutdown = async (signal: NodeJS.Signals) => {
+    app.log.info({ signal }, 'gateway graceful shutdown started');
+    await app.close();
+    app.log.info({ signal }, 'gateway graceful shutdown complete');
+  };
+  process.once('SIGTERM', () => void shutdown('SIGTERM'));
+  process.once('SIGINT', () => void shutdown('SIGINT'));
+
+  await app.listen({ host: env.HOST, port: env.PORT });
 }
 
 void main();

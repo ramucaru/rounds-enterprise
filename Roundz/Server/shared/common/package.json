@@ -15,6 +15,7 @@
     "@aws-sdk/client-sns": "latest",
     "@fastify/cors": "latest",
     "@fastify/jwt": "latest",
+    "@roundz/config": "0.1.0",
     "bcryptjs": "latest",
     "dotenv": "^17.4.2",
     "fastify": "latest",
@@ -24,6 +25,7 @@
     "mqtt": "latest",
     "pg": "latest",
     "pino": "latest",
+    "@fastify/rate-limit": "^10.3.0",
     "zod": "latest"
   },
   "devDependencies": {

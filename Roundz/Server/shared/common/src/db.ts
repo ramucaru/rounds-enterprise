@@ -1,15 +1,16 @@
+import type { ServiceEnv } from './env.js';
 import { Pool, type QueryResult, type QueryResultRow } from 'pg';
 import { schemaSql } from './migrations.js';
 
 export type DbPool = Pool;
 
-export function createDbPool(databaseUrl: string): Pool {
+export function createDbPool(databaseUrl: string, env?: ServiceEnv): Pool {
   return new Pool({
     connectionString: databaseUrl,
-    max: 20,
-    idleTimeoutMillis: 30_000,
-    connectionTimeoutMillis: 5_000,
-    application_name: process.env.SERVICE_NAME ?? 'roundz-service'
+    max: env?.POSTGRES_POOL_MAX ?? 20,
+    idleTimeoutMillis: env?.POSTGRES_IDLE_TIMEOUT_MS ?? 30_000,
+    connectionTimeoutMillis: env?.POSTGRES_CONNECTION_TIMEOUT_MS ?? 5_000,
+    application_name: env?.SERVICE_NAME ?? 'roundz-service'
   });
 }
 

@@ -1,0 +1,9 @@
+packages:
+  - Server/gateway
+  - Server/services/*
+  - Server/shared/*
+  - Admin/shell
+  - Admin/shared
+  - Admin/microfrontends/*
+  - Admin/design-system
+  - Shared
