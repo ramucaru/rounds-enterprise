@@ -16,6 +16,7 @@
     "@fastify/cors": "latest",
     "@fastify/jwt": "latest",
     "bcryptjs": "latest",
+    "dotenv": "^17.4.2",
     "fastify": "latest",
     "google-auth-library": "latest",
     "ioredis": "latest",

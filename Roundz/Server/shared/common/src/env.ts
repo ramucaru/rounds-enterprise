@@ -1,4 +1,7 @@
+import { config as loadDotEnv } from 'dotenv';
 import { z } from 'zod';
+
+loadDotEnv({ path: process.env.DOTENV_CONFIG_PATH ?? '.env', quiet: true });
 
 export const serviceEnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'staging', 'production']).default('development'),
