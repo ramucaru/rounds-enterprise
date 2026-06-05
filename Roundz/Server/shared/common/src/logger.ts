@@ -1,9 +1,9 @@
 import pino from 'pino';
 
-export function createLogger(serviceName: string) {
+export function createLogger(serviceName: string, level = 'info') {
   return pino({
     name: serviceName,
-    level: process.env.LOG_LEVEL ?? 'info',
+    level,
     base: { service: serviceName },
     timestamp: pino.stdTimeFunctions.isoTime
   });

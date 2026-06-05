@@ -4,8 +4,12 @@ import type { ServiceEnv } from './env.js';
 export function createRedisClient(env: ServiceEnv): Redis {
   return new Redis(env.REDIS_URL, {
     lazyConnect: true,
-    maxRetriesPerRequest: 3,
-    enableReadyCheck: true
+    maxRetriesPerRequest: env.REDIS_MAX_RETRIES_PER_REQUEST,
+    connectTimeout: env.REDIS_CONNECT_TIMEOUT_MS,
+    enableReadyCheck: true,
+    retryStrategy(times) {
+      return Math.min(times * 250, 5_000);
+    }
   });
 }
 

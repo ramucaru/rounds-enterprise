@@ -1,8 +1,9 @@
 import { io, type Socket } from 'socket.io-client';
+export * from './env.js';
+import { loadAdminEnv } from './env.js';
 
 function gatewayBaseUrl(): string {
-  const meta = import.meta as unknown as { env?: { VITE_API_BASE_URL?: string } };
-  return meta.env?.VITE_API_BASE_URL ?? 'http://localhost:3000';
+  return loadAdminEnv().VITE_API_BASE_URL;
 }
 
 export interface RoundzApiOptions {
@@ -39,7 +40,7 @@ export class RoundzApiClient {
   notify(body: unknown) { return this.request('/v1/notifications', { method: 'POST', body: JSON.stringify(body) }); }
 }
 
-export function createRoundzSocket(baseUrl = gatewayBaseUrl()): Socket {
+export function createRoundzSocket(baseUrl = loadAdminEnv().VITE_SOCKET_URL): Socket {
   return io(baseUrl, { path: '/socket.io', transports: ['websocket'] });
 }
 
