@@ -17,6 +17,7 @@
     "react": "latest",
     "react-dom": "latest",
     "socket.io-client": "latest",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "zustand": "^5.0.14"
   }
 }

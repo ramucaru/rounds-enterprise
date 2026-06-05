@@ -1,20 +1,14 @@
-import { useQuery } from '@tanstack/react-query';
-import { RoundzApiClient } from '@roundz/admin-shared';
-
-const api = new RoundzApiClient();
+import { useOperations, useRoundzAdminStore } from '@roundz/admin-shared';
 
 export default function Module() {
-  const query = useQuery({
-    queryKey: ['support-system', '/v1/admin/operations'],
-    queryFn: () => api.request<unknown>('/v1/admin/operations'),
-    retry: 1
-  });
-
+  const query = useOperations();
+  const lastEndpoint = useRoundzAdminStore((state) => state.lastEndpoint);
   return (
     <section className="card">
       <h1>Support System</h1>
-      <p>Connected to the Roundz gateway endpoint <code>/v1/admin/operations</code>.</p>
-      {query.isLoading && <p>Loading live data...</p>}
+      <p>Support uses the shared operations cache and selected user/trip context from other microfrontends.</p>
+      <p>Last API endpoint persisted: <strong>{lastEndpoint ?? 'none'}</strong></p>
+      {query.isLoading && <p>Loading operations...</p>}
       {query.error && <p role="alert">Gateway request failed: {(query.error as Error).message}</p>}
       {query.data !== undefined && <pre>{JSON.stringify(query.data, null, 2)}</pre>}
     </section>
