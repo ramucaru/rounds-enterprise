@@ -1,0 +1,41 @@
+@import "./tokens.css";
+
+:root {
+  --roundz-primary: #0ea5e9;
+  --roundz-accent: #22c55e;
+  --roundz-rider-primary: #f97316;
+  --roundz-bg: #08111f;
+  --roundz-bg-soft: #0f172a;
+  --roundz-surface: rgb(15 23 42 / 0.86);
+  --roundz-surface-strong: #1e293b;
+  --roundz-border: rgb(148 163 184 / 0.18);
+  --roundz-text: #e2e8f0;
+  --roundz-muted: #94a3b8;
+  --roundz-radius: 18px;
+  --roundz-radius-lg: 28px;
+  --roundz-shadow: 0 24px 70px rgb(2 6 23 / 0.38);
+}
+
+.roundz-panel {
+  color: var(--roundz-text);
+  background:
+    linear-gradient(135deg, rgb(15 23 42 / 0.96), rgb(30 41 59 / 0.86)),
+    radial-gradient(circle at top right, rgb(14 165 233 / 0.18), transparent 20rem);
+  border: 1px solid var(--roundz-border);
+  border-radius: var(--roundz-radius-lg);
+  box-shadow: var(--roundz-shadow);
+}
+
+.roundz-skeleton {
+  min-height: 1rem;
+  background: linear-gradient(90deg, rgb(148 163 184 / 0.12), rgb(14 165 233 / 0.18), rgb(148 163 184 / 0.12));
+  background-size: 220% 100%;
+  border-radius: 999px;
+  animation: roundz-shimmer 1.4s infinite linear;
+}
+
+@keyframes roundz-shimmer {
+  from { background-position: 220% 0; }
+  to { background-position: -220% 0; }
+}
+
