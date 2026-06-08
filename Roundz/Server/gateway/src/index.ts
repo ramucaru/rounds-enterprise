@@ -76,6 +76,18 @@ async function main() {
 
   io.adapter(createAdapter(redisPub, redisSub));
 
+  void bus.subscribe(EventTopics.NotificationRequested, 'gateway-notifications', async (event) => {
+    io.emit('notification:new', event.payload);
+  }).catch((error) => logger.error({ error }, 'gateway notification event bridge failed'));
+
+  void bus.subscribe(EventTopics.TripStatusChanged, 'gateway-trip-status', async (event) => {
+    io.to(`trip:${event.aggregateId}`).emit('trip:status', event.payload);
+  }).catch((error) => logger.error({ error }, 'gateway trip status event bridge failed'));
+
+  void bus.subscribe(EventTopics.TrackingPositionUpdated, 'gateway-tracking', async (event) => {
+    io.to(`trip:${event.aggregateId}`).emit('tracking:position', event.payload);
+  }).catch((error) => logger.error({ error }, 'gateway tracking event bridge failed'));
+
   io.on('connection', (socket) => {
     logger.info({ socketId: socket.id }, 'socket connected');
 

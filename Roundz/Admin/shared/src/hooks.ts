@@ -81,7 +81,9 @@ export function useRoundzRealtime() {
       void queryClient.invalidateQueries({ queryKey: ['tracking-position'] });
     });
     socket.connect();
-    return () => socket.disconnect();
+    return () => {
+      socket.disconnect();
+    };
   };
 }
 

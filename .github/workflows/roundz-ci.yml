@@ -1,0 +1,66 @@
+name: Roundz CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "Roundz/**"
+      - ".github/workflows/roundz-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "Roundz/**"
+      - ".github/workflows/roundz-ci.yml"
+
+jobs:
+  node:
+    name: Node, backend, and admin
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Roundz
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: Roundz/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: npm audit --audit-level=high
+        continue-on-error: true
+
+  flutter:
+    name: Flutter apps
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [Customer, Rider]
+    defaults:
+      run:
+        working-directory: Roundz/${{ matrix.app }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+  terraform:
+    name: Terraform validation
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Roundz/Infrastructure/terraform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform fmt -check
+      - run: terraform init -backend=false
+      - run: terraform validate
+

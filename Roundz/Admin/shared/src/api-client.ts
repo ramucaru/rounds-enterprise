@@ -38,6 +38,7 @@ export class RoundzApiClient {
   }
 
   analyticsSummary() { return this.request('/v1/analytics/summary'); }
+  login(email: string, password: string) { return this.request<{ token: string; user: unknown }>('/v1/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }); }
   operations() { return this.request('/v1/admin/operations'); }
   user(userId: string) { return this.request(`/v1/users/${encodeURIComponent(userId)}`); }
   wallet(userId: string) { return this.request(`/v1/wallets/${encodeURIComponent(userId)}`); }
@@ -46,6 +47,7 @@ export class RoundzApiClient {
 }
 
 export function createRoundzSocket(baseUrl = loadAdminEnv().VITE_SOCKET_URL): Socket {
-  return io(baseUrl, { path: '/socket.io', transports: ['websocket'] });
+  const token = getRoundzAdminStore().auth.token;
+  return io(baseUrl, { auth: token ? { token } : undefined, path: '/socket.io', transports: ['websocket'] });
 }
 

@@ -11,7 +11,7 @@ class TrackingScreen extends ConsumerStatefulWidget {
 }
 
 class _TrackingScreenState extends ConsumerState<TrackingScreen> {
-  late final RoundzRealtimeClient realtime;
+  RoundzRealtimeClient? realtime;
   String latest = 'Waiting for location updates';
 
   @override
@@ -33,7 +33,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen> {
   }
 
   @override
-  void dispose() { try { realtime.dispose(); } catch (_) {} super.dispose(); }
+  void dispose() { realtime?.dispose(); super.dispose(); }
 
   @override
   Widget build(BuildContext context) => Scaffold(

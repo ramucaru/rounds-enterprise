@@ -1,9 +1,10 @@
 import 'package:dio/dio.dart';
 
+import '../configs/environment.dart';
 import 'app_storage.dart';
 
 class RoundzApiClient {
-  RoundzApiClient({String baseUrl = 'http://10.0.2.2:3000', RoundzAppStorage? storage})
+  RoundzApiClient({String baseUrl = roundzGatewayBaseUrl, RoundzAppStorage? storage})
       : storage = storage ?? RoundzAppStorage.instance,
         _dio = Dio(BaseOptions(baseUrl: baseUrl, contentType: 'application/json', connectTimeout: const Duration(seconds: 12), receiveTimeout: const Duration(seconds: 20))) {
     _dio.interceptors.add(InterceptorsWrapper(

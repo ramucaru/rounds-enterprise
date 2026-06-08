@@ -16,7 +16,7 @@
     "build:shared": "npm run build -w @roundz/config && npm run build -w @roundz/logger && npm run build -w @roundz/types && npm run build -w @roundz/utils && npm run build -w @roundz/events && npm run build -w @roundz/common && npm run build -w @roundz/dto",
     "build:server": "npm run build:shared && npm run build -w @roundz/gateway && npm run build -w @roundz/auth-service && npm run build -w @roundz/user-service && npm run build -w @roundz/rider-service && npm run build -w @roundz/trip-service && npm run build -w @roundz/matching-service && npm run build -w @roundz/tracking-service && npm run build -w @roundz/wallet-service && npm run build -w @roundz/payment-service && npm run build -w @roundz/notification-service && npm run build -w @roundz/analytics-service && npm run build -w @roundz/admin-service && npm run build -w @roundz/kyc-service",
     "build:admin": "npm run build -w @roundz/admin-shared && npm run build -w @roundz/admin-user-management && npm run build -w @roundz/admin-rider-management && npm run build -w @roundz/admin-trip-monitoring && npm run build -w @roundz/admin-wallet-management && npm run build -w @roundz/admin-analytics-dashboard && npm run build -w @roundz/admin-notification-center && npm run build -w @roundz/admin-support-system && npm run build -w @roundz/admin-shell",
-    "test": "npm run test -w @roundz/config && npm run test -w @roundz/dto && npm run test -w @roundz/common",
+    "test": "npm run test -w @roundz/config && npm run build -w @roundz/config && npm run test -w @roundz/dto && npm run test -w @roundz/common",
     "typecheck": "npm run build",
     "lint": "npm run typecheck",
     "dev": "npm run dev:infra && npm run dev:gateway",
